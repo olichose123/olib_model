@@ -2,8 +2,8 @@ package olib.models;
 
 @:autoBuild(olib.models.Macros.addTypeField())
 @:autoBuild(olib.models.Macros.addPublicFieldInitializers())
-// @:autoBuild(olib.models.Macros.addJsonParser())
-// @:autoBuild(olib.models.Macros.addJsonWriter())
+@:autoBuild(olib.models.Macros.addJsonParser())
+@:autoBuild(olib.models.Macros.addJsonWriter())
 class Model
 {
     public static final all:Map<String, Map<String, Model>> = new Map<String, Map<String, Model>>();
