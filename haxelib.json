@@ -15,7 +15,6 @@
         "oli_chose123"
     ],
     "dependencies": {
-        "json2object": "3.11.0",
-        "utest": "1.13.2"
+        "json2object": "3.11.0"
     }
 }
