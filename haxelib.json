@@ -1,14 +1,21 @@
 {
-    "name": "olib_models",
-    "url": "",
+    "name": "olib_model",
+    "url": "https://github.com/olichose123/olib_model",
     "license": "MIT",
-    "tags": [],
-    "description": "",
+    "tags": [
+        "utility",
+        "macro",
+        "json"
+    ],
+    "description": "JSON serializable typed and named models for handling structured data and references",
     "version": "0.1.0",
     "classPath": "src/",
-    "releasenote": "",
+    "releasenote": "Initial release",
     "contributors": [
         "oli_chose123"
     ],
-    "dependencies": {}
+    "dependencies": {
+        "json2object": "3.11.0",
+        "utest": "1.13.2"
+    }
 }
