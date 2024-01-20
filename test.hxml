@@ -4,7 +4,6 @@
 -hl bin/out.hl
 
 -D debug
--D windowFixed=1
 -D message-reporting=pretty
 
 -L json2object
