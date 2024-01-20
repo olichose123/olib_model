@@ -13,9 +13,9 @@ It's better to show with examples.
 ```haxe
 class Person extends olib.models.Model
 {
-    // public static final Type:String = "Person"; is auto-generated
-    // public var type:String; is auto-generated
-    // public var name:String; is auto-generated
+    // public static final Type:String = "Person"; is auto-generated based on class name
+    // public final type:String; is auto-generated, takes the value of static Type
+    // public final name:String; is auto-generated
     public var age:Int;
     public var dog:Reference<Dog>;
 }
@@ -71,7 +71,9 @@ Models also have a `type:String` field that cannot be changed after instantiatio
 @customTypeName("Human")
 class Person extends olib.models.Model
 {
-    public var name:String;
+    // public static final Type:String = "Human"; auto-generated, defaults to metadata value instead of class name
+    // public final type:String = "Human"; auto-generated, same as static Type
+    // public final name:String; auto-generated
     public var age:Int;
 }
 ```
