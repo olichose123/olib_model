@@ -25,23 +25,14 @@ class Macros
         var type = Context.toComplexType(Context.getLocalType());
 
         var constructor:Field = null;
-
-        var initializableFields:Array<Field> = [];
-
-        // find constructor
-        for (field in fields)
+        try
         {
-            switch (field.name)
-            {
-                case 'new':
-                    constructor = field;
-                    fields.remove(constructor);
-                case _:
-                    if (field.access.length == 1 && field.access.contains(APublic))
-                        initializableFields.push(field);
-            }
+            constructor = MacroUtil.getFieldByName(fields, "new");
+            fields.remove(constructor);
         }
+        catch (e:MacroException) {}
 
+        var initializableFields:Array<Field> = MacroUtil.filterFieldsByAccess(fields, [APublic], [AStatic, AFinal, APrivate, AOverride]);
         var constructor_exprs:Array<Expr> = [];
         var constructor_args:Array<FunctionArg> = [];
 
@@ -91,14 +82,10 @@ class Macros
         }
         else
         {
-            switch (constructor.kind)
-            {
-                case FFun(f):
-                    constructor_exprs.insert(0, f.expr);
-                    f.args.concat(constructor_args);
-                    f.expr = macro $b{constructor_exprs};
-                case _:
-            }
+            for (arg in constructor_args)
+                MacroUtil.addArgumentToFunction(constructor, arg);
+            for (expr in constructor_exprs)
+                MacroUtil.addExpressionToFunction(constructor, expr);
         }
 
         // add fields to array
@@ -114,19 +101,13 @@ class Macros
         var fields = Context.getBuildFields();
         var type = Context.toComplexType(Context.getLocalType());
 
-        // build or create constructor
         var constructor:Field = null;
-
-        // find constructor
-        for (field in fields)
+        try
         {
-            switch (field.name)
-            {
-                case 'new':
-                    constructor = field;
-                    fields.remove(constructor);
-            }
+            constructor = MacroUtil.getFieldByName(fields, "new");
+            fields.remove(constructor);
         }
+        catch (e:MacroException) {}
 
         var constructor_exprs:Array<Expr> = [
             macro
@@ -138,31 +119,13 @@ class Macros
 
         // search for an existing static final field named Type
         var typeStaticField:Field = null;
-        for (field in fields)
+        try
         {
-            switch (field.name)
-            {
-                case 'TYPE':
-                    typeStaticField = field;
-                case _:
-            }
+            typeStaticField = MacroUtil.getFieldByName(fields, "TYPE");
+            fields.remove(typeStaticField);
         }
-
-        // get type name
-        var typeName:String;
-        switch (type)
-        {
-            case TPath(typePath):
-                if (typePath.sub != null)
-                {
-                    typeName = typePath.sub;
-                }
-                else
-                {
-                    typeName = typePath.name;
-                }
-            case _:
-        }
+        catch (e:MacroException) {}
+        var typeName:String = MacroUtil.getTypeName(type);
 
         if (typeStaticField == null)
         {
@@ -216,15 +179,9 @@ class Macros
         }
         else
         {
-            switch (constructor.kind)
-            {
-                case FFun(f):
-                    constructor_exprs.insert(0, f.expr);
-                    f.expr = macro $b{constructor_exprs};
-                    f.args.insert(0, nameArg);
-                case _:
-                    throw "Constructor is not a function";
-            }
+            MacroUtil.addArgumentToFunction(constructor, nameArg, true);
+            for (expr in constructor_exprs)
+                MacroUtil.addExpressionToFunction(constructor, expr);
         }
 
         // add fields to array
@@ -237,134 +194,34 @@ class Macros
 
     macro public static function addJsonParser():Array<Field>
     {
-        // Initial fields
         var fields = Context.getBuildFields();
         var type = Context.toComplexType(Context.getLocalType());
 
-        var parserField:Field = null;
-        for (field in fields)
-        {
-            switch (field.name)
-            {
-                case 'parser':
-                    if (field.access.contains(AStatic) && field.access.contains(AFinal))
-                        parserField = field;
-                case _:
-            }
-        }
-        if (parserField == null)
-        {
-            throw new Exception("No parser field found. A static final json2object.JsonParser parser field must be declared.");
-        }
-
-        // create json parser
-        var parser:Field = {
-            name: "fromJson",
-            access: [APublic, AStatic],
+        var parserField:Field = {
+            name: "parser",
+            access: [APublic, AStatic, AFinal],
             pos: Context.currentPos(),
-            kind: FFun({
-                args: [{name: "json", type: macro :String, opt: false}],
-                expr: macro
-                {
-                    return parser.fromJson(json);
-                },
-                ret: macro :$type
-            })
-        }
+            kind: FVar(macro :json2object.JsonParser<$type>, macro new json2object.JsonParser<$type>())
+        };
+        fields.push(parserField);
 
-        fields.push(parser);
-        // return fields
         return fields;
     }
 
     macro public static function addJsonWriter():Array<Field>
     {
-        // Initial fields
-        var fields = Context.getBuildFields();
-        var type = Context.getLocalType();
-        var complexType = Context.toComplexType(type);
-
-        var writerField:Field = null;
-        for (field in fields)
-        {
-            switch (field.name)
-            {
-                case 'writer':
-                    if (field.access.contains(AStatic) && field.access.contains(AFinal))
-                        writerField = field;
-                case _:
-            }
-        }
-        if (writerField == null)
-        {
-            throw new Exception("No writer field found. A static final json2object.JsonWriter writer field must be declared.");
-        }
-
-        // create json parser
-        var serializer:Field = {
-            name: "toJson",
-            access: [APublic],
-            pos: Context.currentPos(),
-            kind: FFun({
-                args: [],
-                expr: macro
-                {
-                    return writer.write(this);
-                },
-                ret: macro :String
-            })
-        }
-
-        fields.push(serializer);
-        // return fields
-        return fields;
-    }
-
-    macro public static function referenceMacro2():ComplexType
-    {
-        // Initial fields
         var fields = Context.getBuildFields();
         var type = Context.toComplexType(Context.getLocalType());
-        // get type parameter
-        var modelType:ComplexType = null;
-        switch (type)
-        {
-            case TPath(p):
-                switch (p.params[0])
-                {
-                    case TPType(t):
-                        modelType = t;
-                    case _:
-                }
-            case _:
-        }
-        var model_type = modelType.toType();
-        if (model_type == null)
-        {
-            return null;
-        }
-        var model_type_field = TypeTools.findField(model_type.getClass(), "TYPE", true);
-        var type_value:String;
-        switch (model_type_field.expr().expr)
-        {
-            case TConst(c):
-                switch (c)
-                {
-                    case TString(s):
-                        type_value = s;
-                    case _:
-                }
-            case _:
-        }
-        // add type field to reference
-        var typeField:Field = {
-            name: 'type',
-            access: [AStatic],
+
+        var writerField:Field = {
+            name: "writer",
+            access: [APublic, AStatic, AFinal],
             pos: Context.currentPos(),
-            kind: FVar(macro :String, macro $v{type_value})
+            kind: FVar(macro :json2object.JsonWriter<$type>, macro new json2object.JsonWriter<$type>())
         };
-        fields.push(typeField);
-        return null;
+        fields.push(writerField);
+
+        return fields;
     }
 
     macro public static function referenceMacro():ComplexType
