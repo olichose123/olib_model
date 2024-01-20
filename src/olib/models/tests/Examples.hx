@@ -29,3 +29,11 @@ class ReferenceExample extends Model
 
     public var myReference:Reference<SimpleExample>;
 }
+
+class ArrayReferenceExample extends Model
+{
+    static final parser = new JsonParser<ArrayReferenceExample>();
+    static final writer = new JsonWriter<ArrayReferenceExample>();
+
+    public var myReferences:Array<Reference<SimpleExample>> = [];
+}
