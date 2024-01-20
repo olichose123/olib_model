@@ -38,31 +38,42 @@ class Tests extends utest.Test
         Assert.isTrue(Model.all.get("OverridenTypeExample").exists("example-a"));
     }
 
-    // function testJsonDeserialization()
-    // {
-    //     // var example:SimpleExample = parser.fromJson(simpleExampleJSON);
-    //     var example:SimpleExample = SimpleExample.fromJson(simpleExampleJSON);
-    //     Assert.equals("example-a", example.name);
-    //     Assert.equals(25, example.myIntValue);
-    //     Assert.equals("hello world", example.myStringValue);
-    //     Assert.isTrue(Model.all.get("SimpleExample").exists("example-a"));
-    // }
-    // function testJsonSerialization()
-    // {
-    //     var example = new SimpleExample("example-a", 25, "hello world");
-    //     var json = example.toJson();
-    //     var parsed = Json.parse(json);
-    //     Assert.equals("example-a", parsed.name);
-    //     Assert.equals(25, parsed.myIntValue);
-    //     Assert.equals("hello world", parsed.myStringValue);
-    // }
+    function testJsonDeserialization()
+    {
+        // var example:SimpleExample = parser.fromJson(simpleExampleJSON);
+        var example:SimpleExample = SimpleExample.fromJson(simpleExampleJSON);
+        Assert.equals("example-a", example.name);
+        Assert.equals(25, example.myIntValue);
+        Assert.equals("hello world", example.myStringValue);
+        Assert.isTrue(Model.all.get("SimpleExample").exists("example-a"));
+    }
+
+    function testJsonSerialization()
+    {
+        var example = new SimpleExample("example-a", 25, "hello world");
+        var json = example.toJson();
+        var parsed = Json.parse(json);
+        Assert.equals("example-a", parsed.name);
+        Assert.equals(25, parsed.myIntValue);
+        Assert.equals("hello world", parsed.myStringValue);
+    }
 
     function testReference()
     {
         var parent = new ReferenceExample("example-a");
         var child = new SimpleExample("example-b", 25, "hello world");
-        parent.myReference = new Reference<SimpleExample>(null, "example-b");
-        parent.myReference.resolve();
-        Assert.equals(child, parent.myReference.instance);
+        parent.myReference = cast new Reference<SimpleExample>("example-b");
+        Assert.equals("SimpleExample", parent.myReference.getType());
+        Assert.equals("example-b", parent.myReference);
+    }
+
+    function testReferenceParsing()
+    {
+        var parent = new ReferenceExample("example-a");
+        var child = new SimpleExample("example-b", 25, "hello world");
+        parent.myReference = cast new Reference<SimpleExample>("example-b");
+        var serialized = parent.toJson();
+        var secondParent = ReferenceExample.fromJson(serialized);
+        Assert.equals(child, secondParent.myReference.get());
     }
 }
