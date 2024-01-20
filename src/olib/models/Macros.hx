@@ -1,5 +1,6 @@
 package olib.models;
 
+import olib.macros.MacroUtil;
 import haxe.macro.ExprTools;
 import haxe.Exception;
 import haxe.macro.Type.FieldAccess;
@@ -10,9 +11,13 @@ import haxe.macro.Context;
 
 using haxe.macro.ComplexTypeTools;
 using haxe.macro.TypeTools;
+using StringTools;
 
 class Macros
 {
+    @:persistent
+    private static var counter = 0;
+
     macro public static function addPublicFieldInitializers():Array<Field>
     {
         // Initial fields get
@@ -60,7 +65,7 @@ class Macros
                     constructor_exprs.push(macro
                         {
                             if ($i{fname} != null)
-                                this.$fname = $i{fname};
+                                this.$fname = cast $i{fname};
                         });
                     constructor_args.push({
                         name: field.name,
@@ -315,7 +320,7 @@ class Macros
         return fields;
     }
 
-    macro public static function referenceMacro():ComplexType
+    macro public static function referenceMacro2():ComplexType
     {
         // Initial fields
         var fields = Context.getBuildFields();
@@ -360,5 +365,72 @@ class Macros
         };
         fields.push(typeField);
         return null;
+    }
+
+    macro public static function referenceMacro():ComplexType
+    {
+        // Initial fields
+        var fields = Context.getBuildFields();
+        var type = Context.toComplexType(Context.getLocalType());
+
+        // get type parameter
+        var tparamCT = MacroUtil.getTypeParameter(type, 0);
+        var tname = tparamCT.toString().replace(".", "_");
+        var tparam = tparamCT.toType();
+        var tclass = MacroUtil.getTypeClass(tparam);
+        var typeField = TypeTools.findField(tclass, "TYPE", true);
+        var typeValue:String;
+        switch (typeField.expr().expr)
+        {
+            case TConst(c):
+                switch (c)
+                {
+                    case TString(s):
+                        typeValue = s;
+                    case _:
+                }
+            case _:
+        }
+        var name = "Reference_" + tname + "_" + counter++;
+        Context.defineType({
+            pos: Context.currentPos(),
+            pack: [],
+            name: name,
+            kind: TDAbstract(macro :String),
+            fields: [
+                {
+                    pos: Context.currentPos(),
+                    name: "new",
+                    access: [APublic],
+                    kind: FFun({
+                        ret: null,
+                        expr: macro this = value,
+                        args: [{name: "value", type: macro :String, opt: false}],
+                    })
+                },
+                {
+                    pos: Context.currentPos(),
+                    name: "getType",
+                    access: [APublic],
+                    kind: FFun({
+                        ret: macro :String,
+                        expr: macro return $v{typeValue},
+                        args: [],
+                    })
+                },
+                {
+                    pos: Context.currentPos(),
+                    name: "get",
+                    access: [APublic],
+                    kind: FFun({
+                        ret: macro :$tparamCT,
+                        expr: macro return cast olib.models.Model.getInstance($v{typeValue}, this),
+                        args: [],
+                    })
+                }
+            ]
+        });
+
+        return TPath({pack: [], name: name});
     }
 }
