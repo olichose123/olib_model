@@ -26,5 +26,20 @@ class Model
         return all.get(type).get(name);
     }
 
+    public static function peek(json:String):String
+    {
+        var obj:Dynamic = haxe.Json.parse(json);
+        var type:String = null;
+        try
+        {
+            type = obj.type;
+        }
+        catch (e:Dynamic)
+        {
+            return null;
+        }
+        return type;
+    }
+
     public var name(default, null):String;
 }
