@@ -396,7 +396,7 @@ class Macros
             pos: Context.currentPos(),
             pack: [],
             name: name,
-            kind: TDAbstract(macro :String),
+            kind: TDAbstract(macro :String, [AbFrom(macro :String), AbTo(macro :String)]),
             fields: [
                 {
                     pos: Context.currentPos(),
