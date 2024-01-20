@@ -1,6 +1,6 @@
 package olib.models;
 
-@:autoBuild(olib.models.Macros.addTypeField())
+@:autoBuild(olib.models.Macros.addNameAndTypeField())
 @:autoBuild(olib.models.Macros.addPublicFieldInitializers())
 @:autoBuild(olib.models.Macros.addJsonParser())
 @:autoBuild(olib.models.Macros.addJsonWriter())
@@ -8,7 +8,7 @@ class Model
 {
     public static final all:Map<String, Map<String, Model>> = new Map<String, Map<String, Model>>();
 
-    public static function registerInstance(type:String, instance:Model):Void
+    public static function register(type:String, instance:Model):Void
     {
         if (!all.exists(type))
         {
@@ -17,7 +17,7 @@ class Model
         all.get(type).set(instance.name, instance);
     }
 
-    public static function getInstance(type:String, name:String):Model
+    public static function get(type:String, name:String):Model
     {
         if (!all.exists(type))
         {

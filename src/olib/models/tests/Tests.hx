@@ -22,7 +22,7 @@ class Tests extends utest.Test
     function testDictAccess()
     {
         var example = new SimpleExample("example-a", 25, "hello world");
-        Assert.equals(Model.all.get("SimpleExample").get("example-a"), example);
+        Assert.equals(Model.get("SimpleExample", "example-a"), example);
     }
 
     function testTypeField()

@@ -95,7 +95,7 @@ class Macros
         return fields;
     }
 
-    macro public static function addTypeField():Array<Field>
+    macro public static function addNameAndTypeField():Array<Field>
     {
         // Initial fields get
         var fields = Context.getBuildFields();
@@ -113,7 +113,7 @@ class Macros
             macro
             {
                 this.name = name;
-                Model.registerInstance(this.type, this);
+                Model.register(this.type, this);
             }
         ];
 
@@ -281,7 +281,7 @@ class Macros
                     access: [APublic],
                     kind: FFun({
                         ret: macro :$tparamCT,
-                        expr: macro return cast olib.models.Model.getInstance($v{typeValue}, this),
+                        expr: macro return cast olib.models.Model.get($v{typeValue}, this),
                         args: [],
                     })
                 }

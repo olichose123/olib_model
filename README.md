@@ -27,7 +27,7 @@ var georges = new Person("Georges", 42, "charlie"); // optional arguments are au
 // name is not optional
 // the dog charlie does not exist yet; but a reference to it exists
 
-Model.getInstance("Person", "Goerges") == georges;
+Model.get("Person", "Goerges") == georges;
 
 // create a dog
 var charlie = new Dog("charlie", 3);
@@ -41,11 +41,11 @@ var charlie_json = Dog.writer.write(charlie);
 
 // deserialize georges
 georges = Person.parser.fromJson(georges_json);
-georges == Model.getInstance("Person", "Georges");
+georges == Model.get("Person", "Georges");
 
 // deserialize charlie
 charlie = Dog.parser.fromJson(charlie_json);
-charlie == Model.getInstance("Dog", "charlie");
+charlie == Model.get("Dog", "charlie");
 ```
 ## Installation
 `haxelib install olib_model`
