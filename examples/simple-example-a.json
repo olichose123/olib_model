@@ -1,0 +1,6 @@
+{
+    "name": "my-file-example",
+    "type": "SimpleExample",
+    "myStringValue": "Hello World",
+    "myIntValue": 42
+}

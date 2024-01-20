@@ -42,7 +42,7 @@ class Tests extends utest.Test
     function testJsonDeserialization()
     {
         // var example:SimpleExample = parser.fromJson(simpleExampleJSON);
-        var example:SimpleExample = SimpleExample.fromJson(simpleExampleJSON);
+        var example:SimpleExample = SimpleExample.parser.fromJson(simpleExampleJSON);
         Assert.equals("example-a", example.name);
         Assert.equals(25, example.myIntValue);
         Assert.equals("hello world", example.myStringValue);
@@ -52,7 +52,7 @@ class Tests extends utest.Test
     function testJsonSerialization()
     {
         var example = new SimpleExample("example-a", 25, "hello world");
-        var json = example.toJson();
+        var json = SimpleExample.writer.write(example);
         var parsed = Json.parse(json);
         Assert.equals("example-a", parsed.name);
         Assert.equals(25, parsed.myIntValue);
@@ -94,8 +94,8 @@ class Tests extends utest.Test
         var parent = new ReferenceExample("example-a");
         var child = new SimpleExample("example-b", 25, "hello world");
         parent.myReference = "example-b";
-        var serialized = parent.toJson();
-        var secondParent = ReferenceExample.fromJson(serialized);
+        var serialized = ReferenceExample.writer.write(parent);
+        var secondParent = ReferenceExample.parser.fromJson(serialized);
         Assert.equals(child, secondParent.myReference.get());
     }
 
@@ -108,8 +108,8 @@ class Tests extends utest.Test
             parent.myReferences.push("example-b-" + i);
         }
 
-        var serialized = parent.toJson();
-        var secondParent = ArrayReferenceExample.fromJson(serialized);
+        var serialized = ArrayReferenceExample.writer.write(parent);
+        var secondParent = ArrayReferenceExample.parser.fromJson(serialized);
         Assert.equals(10, secondParent.myReferences.length);
         Assert.contains("example-b-0", secondParent.myReferences);
         Assert.contains("example-b-1", secondParent.myReferences);
@@ -121,5 +121,11 @@ class Tests extends utest.Test
         Assert.contains("example-b-7", secondParent.myReferences);
         Assert.contains("example-b-8", secondParent.myReferences);
         Assert.contains("example-b-9", secondParent.myReferences);
+    }
+
+    function testPeek():Void
+    {
+        var json = sys.io.File.getContent("examples/simple-example-a.json");
+        Assert.equals(SimpleExample.TYPE, Model.peek(json));
     }
 }
