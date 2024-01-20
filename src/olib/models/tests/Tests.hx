@@ -2,7 +2,6 @@ package olib.models.tests;
 
 import olib.models.tests.Examples.ArrayReferenceExample;
 import olib.models.tests.Examples.ReferenceExample;
-import json2object.JsonParser;
 import haxe.Json;
 import utest.Assert;
 import olib.models.tests.Examples.SimpleExample;
@@ -77,16 +76,10 @@ class Tests extends utest.Test
             parent.myReferences.push("example-b-" + i);
         }
 
-        Assert.contains("example-b-0", parent.myReferences);
-        Assert.contains("example-b-1", parent.myReferences);
-        Assert.contains("example-b-2", parent.myReferences);
-        Assert.contains("example-b-3", parent.myReferences);
-        Assert.contains("example-b-4", parent.myReferences);
-        Assert.contains("example-b-5", parent.myReferences);
-        Assert.contains("example-b-6", parent.myReferences);
-        Assert.contains("example-b-7", parent.myReferences);
-        Assert.contains("example-b-8", parent.myReferences);
-        Assert.contains("example-b-9", parent.myReferences);
+        for (i in 0...10)
+        {
+            Assert.equals("example-b-" + i, parent.myReferences[i]);
+        }
     }
 
     function testReferenceParsing()
@@ -111,21 +104,19 @@ class Tests extends utest.Test
         var serialized = ArrayReferenceExample.writer.write(parent);
         var secondParent = ArrayReferenceExample.parser.fromJson(serialized);
         Assert.equals(10, secondParent.myReferences.length);
-        Assert.contains("example-b-0", secondParent.myReferences);
-        Assert.contains("example-b-1", secondParent.myReferences);
-        Assert.contains("example-b-2", secondParent.myReferences);
-        Assert.contains("example-b-3", secondParent.myReferences);
-        Assert.contains("example-b-4", secondParent.myReferences);
-        Assert.contains("example-b-5", secondParent.myReferences);
-        Assert.contains("example-b-6", secondParent.myReferences);
-        Assert.contains("example-b-7", secondParent.myReferences);
-        Assert.contains("example-b-8", secondParent.myReferences);
-        Assert.contains("example-b-9", secondParent.myReferences);
+        for (i in 0...10)
+        {
+            Assert.contains("example-b-" + i, secondParent.myReferences);
+        }
     }
 
     function testPeek():Void
     {
+        #if sys
         var json = sys.io.File.getContent("examples/simple-example-a.json");
         Assert.equals(SimpleExample.TYPE, Model.peek(json));
+        #else
+        Assert.equals(SimpleExample.TYPE, Model.peek(simpleExampleJSON));
+        #end
     }
 }
