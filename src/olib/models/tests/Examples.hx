@@ -12,10 +12,8 @@ class SimpleExample extends Model
     public var myIntValue:Int;
 }
 
-class OverridenTypeExample extends Model
-{
-    public static final TYPE:String = "OverridenTypeExample";
-}
+@customTypeName("OverridenTypeExample")
+class OverridenTypeExample extends Model {}
 
 class ReferenceExample extends Model
 {
@@ -26,3 +24,6 @@ class ArrayReferenceExample extends Model
 {
     public var myReferences:Array<Reference<SimpleExample>> = [];
 }
+
+@duplicateHandling("Error")
+class ErrorOnDuplicateExample extends Model {}
