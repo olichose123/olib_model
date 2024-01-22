@@ -13,7 +13,7 @@ It's better to show with examples.
 ```haxe
 class Person extends olib.models.Model
 {
-    // public static final TYPE:String = "Person"; is auto-generated
+    // public static final Type:String = "Person"; is auto-generated
     // public var type:String; is auto-generated
     // public var name:String; is auto-generated
     public var age:Int;
@@ -31,7 +31,7 @@ var georges = new Person("Georges", 42, "charlie"); // optional arguments are au
 // the dog charlie does not exist yet; but a reference to it now exists
 
 Model.get("Person", "Georges") == georges;
-Model.get(Person.TYPE, "Georges") == georges;
+Model.get(Person.Type, "Georges") == georges;
 Model.get(georges.type, "Georges") == georges;
 
 // create a dog
@@ -107,7 +107,7 @@ var json = sys.io.File.getContent("path/to/file.json");
 var type = Model.peek(json);
 switch (type)
 {
-    case Person.TYPE:
+    case Person.Type:
         var person = Person.parser.fromJson(json);
     case _:
         trace("unknown type");
