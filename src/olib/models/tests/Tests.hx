@@ -1,5 +1,7 @@
 package olib.models.tests;
 
+import olib.models.Model.ModelException;
+import olib.models.Model.DuplicateHandling;
 import olib.models.tests.Examples.ArrayReferenceExample;
 import olib.models.tests.Examples.ReferenceExample;
 import haxe.Json;
@@ -17,6 +19,11 @@ class Tests extends utest.Test
         "myIntValue": 25
     }
     ';
+
+    function setup()
+    {
+        Model.duplicateHandling = DuplicateHandling.Overwrite;
+    }
 
     function testDictAccess()
     {
@@ -118,5 +125,28 @@ class Tests extends utest.Test
         #else
         Assert.equals(SimpleExample.TYPE, Model.peek(simpleExampleJSON));
         #end
+    }
+
+    function testGlobalDuplicateHandling()
+    {
+        Model.duplicateHandling = DuplicateHandling.Overwrite;
+        var exampleA = new SimpleExample("example-a", 25, "hello world");
+
+        var exampleB = new SimpleExample("example-a", 25, "hello world2");
+        var testExample:SimpleExample = Model.get("SimpleExample", "example-a");
+        Assert.equals("hello world2", testExample.myStringValue);
+
+        Model.duplicateHandling = DuplicateHandling.Ignore;
+        var exampleD = new SimpleExample("example-a", 25, "hello world3");
+        testExample = Model.get("SimpleExample", "example-a");
+        Assert.equals("hello world2", testExample.myStringValue);
+
+        Model.duplicateHandling = DuplicateHandling.Error;
+        try
+        {
+            var exampleE = new SimpleExample("example-a", 25, "hello world4");
+            Assert.fail("Should have thrown an error");
+        }
+        catch (e:ModelException) {}
     }
 }
