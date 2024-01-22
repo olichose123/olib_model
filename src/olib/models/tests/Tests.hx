@@ -1,5 +1,8 @@
 package olib.models.tests;
 
+import olib.models.tests.Examples.ErrorOnDuplicateExample;
+import olib.models.Model.ModelException;
+import olib.models.Model.DuplicateHandling;
 import olib.models.tests.Examples.ArrayReferenceExample;
 import olib.models.tests.Examples.ReferenceExample;
 import haxe.Json;
@@ -18,6 +21,11 @@ class Tests extends utest.Test
     }
     ';
 
+    function setup()
+    {
+        Model.duplicateHandling = DuplicateHandling.Overwrite;
+    }
+
     function testDictAccess()
     {
         var example = new SimpleExample("example-a", 25, "hello world");
@@ -28,7 +36,7 @@ class Tests extends utest.Test
     {
         var example = new SimpleExample("example-a", 25, "hello world");
         Assert.equals("SimpleExample", example.type);
-        Assert.equals(example.type, SimpleExample.TYPE);
+        Assert.equals(example.type, SimpleExample.Type);
     }
 
     function testTypeOverride()
@@ -114,9 +122,50 @@ class Tests extends utest.Test
     {
         #if sys
         var json = sys.io.File.getContent("examples/simple-example-a.json");
-        Assert.equals(SimpleExample.TYPE, Model.peek(json));
+        Assert.equals(SimpleExample.Type, Model.peek(json));
         #else
-        Assert.equals(SimpleExample.TYPE, Model.peek(simpleExampleJSON));
+        Assert.equals(SimpleExample.Type, Model.peek(simpleExampleJSON));
         #end
+    }
+
+    function testGlobalDuplicateHandling()
+    {
+        Model.duplicateHandling = DuplicateHandling.Overwrite;
+        var exampleA = new SimpleExample("example-a", 25, "hello world");
+
+        var exampleB = new SimpleExample("example-a", 25, "hello world2");
+        var testExample:SimpleExample = Model.get("SimpleExample", "example-a");
+        Assert.equals("hello world2", testExample.myStringValue);
+
+        Model.duplicateHandling = DuplicateHandling.Ignore;
+        var exampleD = new SimpleExample("example-a", 25, "hello world3");
+        testExample = Model.get("SimpleExample", "example-a");
+        Assert.equals("hello world2", testExample.myStringValue);
+
+        Model.duplicateHandling = DuplicateHandling.Error;
+        try
+        {
+            var exampleE = new SimpleExample("example-a", 25, "hello world4");
+            Assert.fail("Should have thrown an error");
+        }
+        catch (e:ModelException)
+        {
+            Assert.pass();
+        }
+    }
+
+    function testLocalDuplicateHandling()
+    {
+        Model.duplicateHandling = DuplicateHandling.Overwrite;
+        var exampleA = new ErrorOnDuplicateExample("example-a");
+        try
+        {
+            var exampleB = new ErrorOnDuplicateExample("example-a");
+            Assert.fail("Should have thrown an error");
+        }
+        catch (e:ModelException) {}
+        {
+            Assert.pass();
+        }
     }
 }
