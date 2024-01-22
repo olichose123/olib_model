@@ -165,6 +165,52 @@ class MacroUtil
                 throw new MacroException("Type " + type + " is not supported");
         }
     }
+
+    public static function findMetadata(type:Type, name:String):Array<MetadataEntry>
+    {
+        var meta;
+        var entries;
+        switch (type)
+        {
+            case TInst(t, params):
+                meta = t.get().meta;
+            case _:
+                throw new MacroException("Type " + type + " is not supported");
+        }
+        if (!meta.has(name))
+        {
+            return null;
+        }
+        else
+        {
+            return meta.extract(name);
+        }
+        return null;
+    }
+
+    public static function findMetadataStringValue(type:Type, name:String):String
+    {
+        var entries = findMetadata(type, name);
+        if (entries == null)
+            return null;
+        if (entries.length == 0)
+            return null;
+
+        var exprdef:ExprDef = entries[0].params[0].expr;
+        switch (exprdef)
+        {
+            case EConst(c):
+                switch (c)
+                {
+                    case CString(s):
+                        return s;
+                    case _:
+                        throw new MacroException("Metadata " + name + " is not a string");
+                }
+            case _:
+                throw new MacroException("Metadata " + name + " is not a string");
+        }
+    }
 }
 
 class MacroException extends Exception {}
