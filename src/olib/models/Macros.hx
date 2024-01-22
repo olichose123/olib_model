@@ -1,5 +1,6 @@
 package olib.models;
 
+import olib.models.Model.DuplicateHandling;
 import olib.macros.MacroUtil;
 import haxe.macro.ExprTools;
 import haxe.Exception;
@@ -109,49 +110,37 @@ class Macros
         }
         catch (e:MacroException) {}
 
+        var custom_handler = null;
+        var mtn_name = MacroUtil.findMetadataStringValue(Context.getLocalType(), "duplicateHandling");
+        if (mtn_name != null)
+        {
+            custom_handler = DuplicateHandling.createByName(mtn_name);
+            if (custom_handler == null)
+                throw new Exception("Invalid duplicateHandling: " + mtn_name);
+        }
+
         var constructor_exprs:Array<Expr> = [
             macro
             {
                 this.name = name;
-                Model.register(this.type, this);
+
+                Model.register(this.type, this, $v{custom_handler});
             }
         ];
 
-        // search for an existing static final field named Type
-        var typeStaticField:Field = null;
-        try
-        {
-            typeStaticField = MacroUtil.getFieldByName(fields, "TYPE");
-            fields.remove(typeStaticField);
-        }
-        catch (e:MacroException) {}
         var typeName:String = MacroUtil.getTypeName(type);
+        var custom_type_name = MacroUtil.findMetadataStringValue(Context.getLocalType(), "customTypeName");
 
-        if (typeStaticField == null)
+        if (custom_type_name != null)
         {
-            var typeStaticField:Field = {
-                name: 'TYPE',
-                access: [APublic, AStatic, AFinal],
-                pos: Context.currentPos(),
-                kind: FVar(macro :String, macro $v{typeName})
-            };
-            fields.push(typeStaticField);
+            typeName = custom_type_name;
         }
-        else
-        {
-            // find default value of typeStaticField
-            switch (typeStaticField.kind)
-            {
-                case FVar(t, e):
-                    switch (e.expr)
-                    {
-                        case EConst(CString(s)):
-                            typeName = s;
-                        case _:
-                    }
-                case _:
-            }
-        }
+        var typeStaticField:Field = {
+            name: 'Type',
+            access: [APublic, AStatic, AFinal],
+            pos: Context.currentPos(),
+            kind: FVar(macro :String, macro $v{typeName})
+        };
 
         // create field
         var typeField:Field = {
@@ -185,6 +174,7 @@ class Macros
         }
 
         // add fields to array
+        fields.push(typeStaticField);
         fields.push(constructor);
         fields.push(typeField);
 
@@ -235,19 +225,14 @@ class Macros
         var tname = tparamCT.toString().replace(".", "_");
         var tparam = tparamCT.toType();
         var tclass = MacroUtil.getTypeClass(tparam);
-        var typeField = TypeTools.findField(tclass, "TYPE", true);
-        var typeValue:String;
-        switch (typeField.expr().expr)
+
+        var typeName:String = MacroUtil.getTypeName(tparam.toComplexType());
+        var custom_type_name = MacroUtil.findMetadataStringValue(tparam, "customTypeName");
+        if (custom_type_name != null)
         {
-            case TConst(c):
-                switch (c)
-                {
-                    case TString(s):
-                        typeValue = s;
-                    case _:
-                }
-            case _:
+            typeName = custom_type_name;
         }
+
         var name = "Reference_" + tname + "_" + counter++;
         Context.defineType({
             pos: Context.currentPos(),
@@ -271,7 +256,7 @@ class Macros
                     access: [APublic],
                     kind: FFun({
                         ret: macro :String,
-                        expr: macro return $v{typeValue},
+                        expr: macro return $v{typeName},
                         args: [],
                     })
                 },
@@ -281,7 +266,7 @@ class Macros
                     access: [APublic],
                     kind: FFun({
                         ret: macro :$tparamCT,
-                        expr: macro return cast olib.models.Model.get($v{typeValue}, this),
+                        expr: macro return cast olib.models.Model.get($v{typeName}, this),
                         args: [],
                     })
                 }

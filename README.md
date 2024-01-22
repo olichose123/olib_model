@@ -13,7 +13,7 @@ It's better to show with examples.
 ```haxe
 class Person extends olib.models.Model
 {
-    // public static final TYPE:String = "Person"; is auto-generated
+    // public static final Type:String = "Person"; is auto-generated
     // public var type:String; is auto-generated
     // public var name:String; is auto-generated
     public var age:Int;
@@ -31,7 +31,7 @@ var georges = new Person("Georges", 42, "charlie"); // optional arguments are au
 // the dog charlie does not exist yet; but a reference to it now exists
 
 Model.get("Person", "Georges") == georges;
-Model.get(Person.TYPE, "Georges") == georges;
+Model.get(Person.Type, "Georges") == georges;
 Model.get(georges.type, "Georges") == georges;
 
 // create a dog
@@ -65,13 +65,30 @@ All models must extend olib.models.Model. By doing this, those models gain speci
 
 Models have a `name:String` field that cannot be changed after instantiation. This is the unique key to reference them by.
 
-Models also have a `type:String` field that cannot be changed after instantiation. This is the type of the model. It takes the value of the class' name, so a class `Person` will have a type of `"Person"`. It is also stored as a static `TYPE` field. The TYPE of a model can instead be manually set by declaring a public static final TYPE field with a different value. In the following example, the TYPE of Person is "Human" instead of `"Person"`.
+Models also have a `type:String` field that cannot be changed after instantiation. This is the type of the model. It takes the value of the class' name, so a class `Person` will have a type of `"Person"`. It is also stored as a static `Type` field. The Type of a model can instead be manually set by declaring a metadata value with a different type name. In the following example, the Type of Person is "Human" instead of `"Person"`.
 ```haxe
+
+@customTypeName("Human")
 class Person extends olib.models.Model
 {
-    public static final TYPE:String = "Human";
     public var name:String;
     public var age:Int;
+}
+```
+
+By default, when you instantiate two models of the same type and name, the second one overrides the first. You can change this behavior globally:
+```haxe
+Model.duplicateHandling = DuplicateHandling.Overwrite; // will overwrite the current model
+Model.duplicateHandling = DuplicateHandling.Error; // will throw a ModelException
+Model.duplicateHandling = DuplicateHandling.Ignore;	// will ignore the new model
+```
+
+You can also overwrite the behavior per model. This is useful if you want to block a model type from being overwritten, for example:
+```haxe
+@duplicateHandling("Error")
+class ImportantGameSetings extends Model
+{
+   // you wouldn't want a mod to overwrite your Settings model, so you can disable it here
 }
 ```
 
@@ -90,7 +107,7 @@ var json = sys.io.File.getContent("path/to/file.json");
 var type = Model.peek(json);
 switch (type)
 {
-    case Person.TYPE:
+    case Person.Type:
         var person = Person.parser.fromJson(json);
     case _:
         trace("unknown type");
