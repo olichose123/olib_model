@@ -198,6 +198,48 @@ class Macros
         return fields;
     }
 
+    macro public static function addParserFunction():Array<Field>
+    {
+        var fields = Context.getBuildFields();
+        var type = Context.toComplexType(Context.getLocalType());
+
+        var custom_handler = null;
+        var mtn_name = MacroUtil.findMetadataStringValue(Context.getLocalType(), "duplicateHandling");
+        if (mtn_name != null)
+        {
+            custom_handler = DuplicateHandling.createByName(mtn_name);
+            if (custom_handler == null)
+                throw new Exception("Invalid duplicateHandling: " + mtn_name);
+        }
+
+        var parserFunction:Field = {
+            name: "parse",
+            access: [APublic, AStatic],
+            pos: Context.currentPos(),
+            kind: FFun({
+                args: [
+                    {name: "json", type: macro :String, opt: false},
+                    {
+                        name: "path",
+                        type: macro :String,
+                        opt: true,
+                        value: macro "",
+                    }
+                ],
+                expr: macro
+                {
+                    var result = parser.fromJson(json, path);
+                    Model.register(result.type, result, $v{custom_handler});
+                    return result;
+                },
+                ret: macro :$type
+            })
+        };
+        fields.push(parserFunction);
+
+        return fields;
+    }
+
     macro public static function addJsonWriter():Array<Field>
     {
         var fields = Context.getBuildFields();
@@ -210,6 +252,34 @@ class Macros
             kind: FVar(macro :json2object.JsonWriter<$type>, macro new json2object.JsonWriter<$type>())
         };
         fields.push(writerField);
+
+        return fields;
+    }
+
+    macro public static function addWriterFunction():Array<Field>
+    {
+        var fields = Context.getBuildFields();
+        var type = Context.toComplexType(Context.getLocalType());
+
+        var writerFunction:Field = {
+            name: "write",
+            access: [APublic, AStatic],
+            pos: Context.currentPos(),
+            kind: FFun({
+                args: [
+                    {name: "value", type: macro :$type, opt: false},
+                    {
+                        name: "space",
+                        type: macro :String,
+                        opt: true,
+                        value: macro "  ",
+                    }
+                ],
+                expr: macro return writer.write(value, space),
+                ret: macro :String
+            })
+        };
+        fields.push(writerFunction);
 
         return fields;
     }
