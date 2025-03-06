@@ -6,7 +6,7 @@
   "description": "JSON serializable typed and named models for handling structured data and references",
   "version": "1.1.0",
   "classPath": "src/",
-  "releasenote": "Add behavior control based on metadata, duplicate model handling, and more.",
+  "releasenote": "Fix parsing to call register method",
   "contributors": ["oli_chose123"],
   "dependencies": {
     "json2object": "3.11.0"
