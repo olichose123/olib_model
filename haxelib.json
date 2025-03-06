@@ -1,20 +1,14 @@
 {
-    "name": "olib_model",
-    "url": "https://github.com/olichose123/olib_model",
-    "license": "MIT",
-    "tags": [
-        "utility",
-        "macro",
-        "json"
-    ],
-    "description": "JSON serializable typed and named models for handling structured data and references",
-    "version": "1.0.0",
-    "classPath": "src/",
-    "releasenote": "Add behavior control based on metadata, duplicate model handling, and more.",
-    "contributors": [
-        "oli_chose123"
-    ],
-    "dependencies": {
-        "json2object": "3.11.0"
-    }
+  "name": "olib_model",
+  "url": "https://github.com/olichose123/olib_model",
+  "license": "MIT",
+  "tags": ["utility", "macro", "json"],
+  "description": "JSON serializable typed and named models for handling structured data and references",
+  "version": "1.1.0",
+  "classPath": "src/",
+  "releasenote": "Add behavior control based on metadata, duplicate model handling, and more.",
+  "contributors": ["oli_chose123"],
+  "dependencies": {
+    "json2object": "3.11.0"
+  }
 }
