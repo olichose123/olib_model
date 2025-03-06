@@ -6,6 +6,8 @@ import haxe.Exception;
 @:autoBuild(olib.models.Macros.addPublicFieldInitializers())
 @:autoBuild(olib.models.Macros.addJsonParser())
 @:autoBuild(olib.models.Macros.addJsonWriter())
+@:autoBuild(olib.models.Macros.addParserFunction())
+@:autoBuild(olib.models.Macros.addWriterFunction())
 class Model
 {
     public static final all:Map<String, Map<String, Model>> = new Map<String, Map<String, Model>>();
@@ -39,6 +41,15 @@ class Model
             all.set(type, new Map<String, Model>());
         }
         all.get(type).set(instance.name, instance);
+    }
+
+    public static function getAll<T:Model>(type:String):Iterator<T>
+    {
+        if (!all.exists(type))
+        {
+            return [].iterator();
+        }
+        return cast all.get(type).iterator();
     }
 
     public static function get<T:Model>(type:String, name:String):T
