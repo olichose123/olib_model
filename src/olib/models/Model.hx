@@ -220,4 +220,4 @@ enum DuplicateHandling
     Custom;
 }
 
-class extends Exception {}
+class ModelException extends Exception {}
