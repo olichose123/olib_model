@@ -284,6 +284,26 @@ class Macros
         return fields;
     }
 
+    macro public static function addGetFunction():Array<Field>
+    {
+        var fields = Context.getBuildFields();
+        var type = Context.toComplexType(Context.getLocalType());
+
+        var getFunction:Field = {
+            name: "get",
+            access: [APublic, AStatic],
+            pos: Context.currentPos(),
+            kind: FFun({
+                args: [{name: "name", type: macro :String, opt: false},],
+                expr: macro return Model.get(Type, name),
+                ret: macro :$type
+            })
+        };
+        fields.push(getFunction);
+
+        return fields;
+    }
+
     macro public static function referenceMacro():ComplexType
     {
         // Initial fields
