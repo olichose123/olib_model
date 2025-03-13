@@ -41,6 +41,7 @@ class Model
             all.set(type, new Map<String, Model>());
         }
         all.get(type).set(instance.name, instance);
+        instance.onRegister();
     }
 
     public static function getAll<T:Model>(type:String):Iterator<T>
@@ -59,6 +60,15 @@ class Model
             return null;
         }
         return cast all.get(type).get(name);
+    }
+
+    public static function remove(type:String, name:String):Bool
+    {
+        if (!all.exists(type))
+        {
+            return false;
+        }
+        return all.get(type).remove(name);
     }
 
     public static function exists(type:String, name:String):Bool
@@ -86,6 +96,11 @@ class Model
     }
 
     public var name(default, null):String;
+
+    function onRegister():Void
+    {
+        //
+    }
 }
 
 enum DuplicateHandling
