@@ -1,10 +1,9 @@
 -cp src
 -main olib.models.tests.Main
+--interp
 
--hl bin/out.hl
-
--D debug
--D message-reporting=pretty
+-D UTEST_PRINT_TESTS
+-D no-deprecation-warnings
 
 -L json2object
 -L utest
