@@ -7,3 +7,4 @@
 
 -L json2object
 -L utest
+--macro include("json2object")
