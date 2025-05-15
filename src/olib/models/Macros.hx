@@ -50,6 +50,19 @@ class Macros
 
         for (field in initializableFields)
         {
+            var skip = false;
+            for (m in field.meta)
+            {
+                if (m.name == ":jignored")
+                {
+                    // skip ignored fields
+                    skip = true;
+                    break;
+                }
+            }
+            if (skip)
+                continue;
+
             var fname:String = field.name;
             switch (field.kind)
             {
